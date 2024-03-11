@@ -4,15 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="chat-window" id="chat-window"></div>
-        <input type="text" id="message-input" placeholder="Type a message...">
-        <button onclick="sendMessage()">Send</button>
-    </div>
+    <div id="chat-messages"></div>
+    <input type="text" id="message-input">
+    <button onclick="sendMessage()">Send</button>
 
-    <script src="script.js"></script>
+    <script>
+        // Function to send a message
+        function sendMessage() {
+            // Get message input
+            var messageInput = document.getElementById("message-input").value;
+
+            if (messageInput.trim() !== "") {
+                // Create a new message object
+                var message = {
+                    text: messageInput,
+                    timestamp: new Date().toLocaleString() // You can customize timestamp format as needed
+                };
+
+                // Get existing messages from localStorage or create an empty array
+                var messages = JSON.parse(localStorage.getItem("chatMessages")) || [];
+
+                // Add the new message to the array
+                messages.push(message);
+
+                // Save the updated messages array back to localStorage
+                localStorage.setItem("chatMessages", JSON.stringify(messages));
+
+                // Clear input field
+                document.getElementById("message-input").value = "";
+
+                // Refresh chat to display the new message
+                refreshChat();
+            }
+        }
+
+        // Function to display messages in the chat interface
+        function refreshChat() {
+            // Get messages from localStorage
+            var messages = JSON.parse(localStorage.getItem("chatMessages")) || [];
+
+            // Get chat-messages div
+            var chatMessagesDiv = document.getElementById("chat-messages");
+
+            // Clear existing messages
+            chatMessagesDiv.innerHTML = "";
+
+            // Display each message in the chat interface
+            messages.forEach(function(message) {
+                var messageElement = document.createElement("div");
+                messageElement.textContent = message.timestamp + " - " + message.text;
+                chatMessagesDiv.appendChild(messageElement);
+            });
+        }
+
+        // Call refreshChat when the page loads
+        window.onload = refreshChat;
+    </script>
 </body>
 </html>
+
+
