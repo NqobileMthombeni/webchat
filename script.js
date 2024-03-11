@@ -1,58 +1,43 @@
-// Function to send a message
-function sendMessage() {
-    var messageInput = document.getElementById('message-input');
-    var message = messageInput.value.trim();
-    if (message !== '') {
-        // Send message to backend server
-        fetch('/sendMessage', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ message: message }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Add message to chat messages
-                var messageElement = document.createElement('div');
-                messageElement.innerText = message;
-                var chatMessages = document.getElementById('chat-messages');
-                chatMessages.appendChild(messageElement);
-            } else {
-                console.error('Failed to send message');
-            }
-        })
-        .catch(error => {
-            console.error('Error sending message:', error);
-        });
+// script.js
 
-        // Clear message input
-        messageInput.value = '';
-    }
-}
+window.onload = function () {
+  // Fetch messages from the server and display them
+  fetchMessages();
+};
 
-// Function to load previous messages from backend server
-function loadMessages() {
-    fetch('/getMessages')
+function fetchMessages() {
+  fetch('/messages')
     .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            var messages = data.messages;
-            var chatMessages = document.getElementById('chat-messages');
-            messages.forEach(function(message) {
-                var messageElement = document.createElement('div');
-                messageElement.innerText = message;
-                chatMessages.appendChild(messageElement);
-            });
-        } else {
-            console.error('Failed to load messages');
-        }
+    .then(messages => {
+      const messagesDiv = document.getElementById('messages');
+      messages.forEach(message => {
+        const messageElement = document.createElement('div');
+        messageElement.textContent = message.text;
+        messagesDiv.appendChild(messageElement);
+      });
     })
-    .catch(error => {
-        console.error('Error loading messages:', error);
-    });
+    .catch(error => console.error('Error fetching messages:', error));
 }
 
-// Load previous messages when the page loads
-window.onload = loadMessages;
+function sendMessage() {
+  const messageInput = document.getElementById('messageInput');
+  const text = messageInput.value;
+
+  // Send message to the server
+  fetch('/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ text }),
+  })
+    .then(response => {
+      if (response.ok) {
+        messageInput.value = ''; // Clear input field after sending message
+        fetchMessages(); // Fetch updated messages from the server
+      } else {
+        console.error('Failed to send message:', response.statusText);
+      }
+    })
+    .catch(error => console.error('Error sending message:', error));
+}
